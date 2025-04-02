@@ -1,6 +1,11 @@
-tensorflow
-scikit-learn
+opencv-python
 matplotlib
-Pillow
-numpy
+tensorflow
+pillow
 pandas
+scikit-learn
+numpy
+seaborn
+joblib
+tqdm
+pipdeptree
