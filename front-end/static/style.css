@@ -452,3 +452,137 @@ footer a {
     background-color: #81C784;
     color: #fff;
 }
+
+/* ---- visualisation page --- */
+
+.visualize-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.stats-container {
+    background-color: #f9fafb;
+    padding: 30px;
+    border-radius: 8px;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    font-family: sans-serif;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 4rem;
+    margin-top: 1rem;
+}
+
+.stat {
+    text-align: center;
+}
+
+.stat strong {
+    display: block;
+    font-size: 2em;
+    color: #2e7d32;
+}
+
+.stat span {
+    display: block;
+    color: #555;
+    font-size: 0.95em;
+    line-height: 2;
+}
+
+.visualization-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2rem;
+    margin: 2rem 0;
+}
+
+@media (max-width: 768px) {
+    .visualization-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.visualization-card {
+    background: white;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.visualization-image {
+    width: 100%;
+    height: 300px;
+    object-fit: contain;
+    margin-top: 1rem;
+}
+
+.visualization-content {
+    padding: 1.5rem;
+}
+
+.visualization-content h3, ul {
+    color: #555;
+}
+
+.visualization-description {
+    color: #555;
+}
+
+.visualization-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    margin-top: 0.4rem;
+}
+
+.visualization-description {
+    font-size: 0.95rem;
+    line-height: 1.6;
+}
+
+.key-points {
+    margin-top: 1rem;
+    padding-left: 1.5rem;
+}
+
+.key-points li {
+    margin-bottom: 0.5rem;
+    position: relative;
+}
+
+.key-points li::before {
+    content: "•";
+    position: absolute;
+    left: -1rem;
+}
+
+.metric-card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.metric-title {
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+}
+
+.metric-value {
+    font-size: 2rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+}
+
+.metric-description {
+    font-size: 0.875rem;
+}

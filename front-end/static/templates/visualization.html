@@ -26,13 +26,82 @@
         </nav>
     </header>
 
-    <div class="container">
-        <h1 class="title">Classification Statistics</h1>
-        <canvas id="wasteChart" width="400" height="300"></canvas>
-    </div>
-
-    <script src="/front-end/script.js"></script>
-</body>
+    <main class="visualize-container"> 
+        <div class="stats-container">
+            <div class="stat">
+                <strong>75%</strong>
+                <span>Model Accuracy</span>
+            </div>
+            <div class="stat">
+                <strong>1,274,985</strong>
+                <span>Total Predictions</span>
+            </div>
+            <div class="stat">
+                <strong>567</strong>
+                <span>Tons CO₂ Saved</span>
+            </div>
+        </div>
+    
+        <div class="visualization-grid">
+            <div class="visualization-card">
+                <img src="/front-end/images/class-imbalance.png" alt="Class Distribution"
+                    class="visualization-image" />
+                <div class="visualization-content">
+                    <h3 class="visualization-title"><strong>Class Distribution</strong></h3>
+                    <p class="visualization-description">The bar chart illustrates the number of images across ten classes: plastic, cardboard, brown-glass, metal, paper, biological, green-glass, battery, trash, clothes, white-glass, and shoes, revealing a significant class imbalance, particularly the dominance of the "clothes" class.</p>
+                    <ul class="key-points">
+                        <li><strong>Dominant Class (Clothes):</strong> The "clothes" class has the most images, exceeding 5000, creating a substantial class imbalance that could introduce
+                        bias in predictions.</li>
+                        <li><strong>Underrepresented Classes:</strong> The classes "plastic," "brown-glass," "biological," "green-glass," and "white-glass" have the fewest images, each under
+                        1000. This could lead to poor generalization and high misclassification rates for these classes.</li>
+                        <li><strong>Solution - Oversampling:</strong> After oversampling, the dataset now has a balanced distribution with each class having 5325 images, improving the model's ability to generalize across all classes and reduce potential bias towards the previously dominant "clothes" class.</li>
+                    </ul>
+                </div>
+            </div>
+    
+            <div class="visualization-card">
+                <img src="/front-end/images/retrained-graph.png" alt="Training & Validation Performance"
+                    class="visualization-image" />
+                <div class="visualization-content">
+                    <h3 class="visualization-title"><strong>Training & Validation Performance</strong></h3>
+                    <p class="visualization-description">The left graph shows the trends in training and validation loss, while the right graph shows the corresponding trends in training and validation accuracy which are crucial for understanding the model's learning progress and its ability to generalize to unseen data.</p>
+                    <ul class="key-points">
+                        <li><strong>Successful Training:</strong> The model trained successfully, as shown from the decreasing loss and increasing accuracy on both the training and validation sets.</li>
+                        <li><strong>Good Generalization:</strong> The convergence of the training and validation curves indicates good generalization, meaning the model is likely to perform well on new, unseen data.</li>
+                        <li><strong>Potential for Improvement:</strong> While the model shows good performance, there might still be room for improvement, such as optimizing hyperparameters or
+                        using more advanced architectures, to further increase accuracy and reduce loss.</li>
+                    </ul>
+                </div>
+            </div>
+    
+            <div class="visualization-card">
+                <img src="/front-end/images/" alt="Distribution"
+                    class="visualization-image" />
+                <div class="visualization-content">
+                    <h3 class="visualization-title"><strong>Aspect Ratio Distribution</strong></h3>
+                    <p class="visualization-description">The aspect ratio distribution shows that most images</p>
+                    <ul class="key-points">
+                        <li><strong>Most re:</strong> The majority of.</li>
+                        <li><strong>Low Ditios:</strong> ed.</li>
+                        <li><strong>Imbalanodel:</strong> The is applied.</li>
+                    </ul>
+                </div>
+            </div>
+    
+            <div class="visualization-card">
+                <img src="/front-end/images/" alt="Distribution" class="visualization-image" />
+                <div class="visualization-content">
+                    <h3 class="visualization-title"><strong> Distribution</strong></h3>
+                    <p class="visualization-description"> brightness levels.</p>
+                    <ul class="key-points">
+                        <li><strong>Balaness:</strong> of the dataset.</li>
+                        <li><strong>Limiteemes:</strong>sed or underexposed images.</li>
+                        <li><strong>Unifoity:</strong>The preprocessing.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </main>
 
 <!-- footer section -->
 

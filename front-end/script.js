@@ -1,12 +1,68 @@
 document.addEventListener("DOMContentLoaded", () => {
   // Check if we're on the home page with counters
-  const itemsCounter = document.getElementById("items-counter");
-  const tonsCounter = document.getElementById("tons-counter");
-  const accuracyCounter = document.getElementById("accuracy-counter");
+  const homeItemsCounter = document.getElementById("items-counter");
+  const homeTonsCounter = document.getElementById("tons-counter");
+  const homeAccuracyCounter = document.getElementById("accuracy-counter");
 
   // Run counter animation if on home page
-  if (itemsCounter && tonsCounter && accuracyCounter) {
-    animateCounters(1274985, 367, 75);
+  if (homeItemsCounter && homeTonsCounter && homeAccuracyCounter) {
+    animateCounters(
+      1274985,
+      367,
+      75,
+      homeItemsCounter,
+      homeTonsCounter,
+      homeAccuracyCounter
+    );
+  }
+
+  // Check if we're on the visualization page
+  const visualizationPage = document.querySelector(".visualize-container");
+  if (visualizationPage) {
+    // Get all stat elements from the visualization page
+    const statElements = visualizationPage.querySelectorAll(".stat strong");
+
+    if (statElements.length === 3) {
+      // Extract the target values from the existing content
+      const accuracyValue = parseInt(
+        statElements[0].textContent.replace(/\D/g, "")
+      );
+      const predictionsValue = parseInt(
+        statElements[1].textContent.replace(/[^\d]/g, "")
+      );
+      const tonsValue = parseInt(
+        statElements[2].textContent.replace(/\D/g, "")
+      );
+
+      // Replace the content with zero to start animation
+      statElements.forEach((el) => (el.textContent = "0"));
+
+      // Animate the counters
+      animateValue(
+        statElements[0],
+        0,
+        accuracyValue,
+        120,
+        1000 / 60,
+        (val) => `${val}%`
+      );
+      animateValue(
+        statElements[1],
+        0,
+        predictionsValue,
+        120,
+        1000 / 60,
+        numberWithCommas
+      );
+      animateValue(
+        statElements[2],
+        0,
+        tonsValue,
+        120,
+        1000 / 60,
+        numberWithCommas
+      );
+    }
   }
 
   // Check if we're on a page with file upload elements
@@ -214,8 +270,15 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // Counter animation function
-  function animateCounters(itemsTarget, tonsTarget, accuracyTarget) {
+  // Counter animation function for homepage
+  function animateCounters(
+    itemsTarget,
+    tonsTarget,
+    accuracyTarget,
+    itemsEl,
+    tonsEl,
+    accuracyEl
+  ) {
     // Define animation duration
     const duration = 2000; // 2 seconds
     const frameDuration = 1000 / 60; // 60fps
@@ -223,7 +286,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Animate items counter
     animateValue(
-      itemsCounter,
+      itemsEl,
       0,
       itemsTarget,
       totalFrames,
@@ -233,7 +296,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Animate tons counter
     animateValue(
-      tonsCounter,
+      tonsEl,
       0,
       tonsTarget,
       totalFrames,
@@ -242,13 +305,7 @@ document.addEventListener("DOMContentLoaded", () => {
     );
 
     // Animate accuracy counter
-    animateValue(
-      accuracyCounter,
-      0,
-      accuracyTarget,
-      totalFrames,
-      frameDuration
-    );
+    animateValue(accuracyEl, 0, accuracyTarget, totalFrames, frameDuration);
   }
 
   // Helper function for counter animation
