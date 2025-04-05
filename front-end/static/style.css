@@ -345,10 +345,10 @@ footer a {
     display: block;
 }
 
-.predict-btn a {
+/* .predict-btn a {
     text-decoration: none;
     color: #fff;
-}
+} */
 
 .predict-btn:hover {
     background-color: #81C784;
@@ -357,3 +357,98 @@ footer a {
 
 /* ---- retrain page --- */
 
+.retrain-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.retrain-title {
+    text-align: center;
+    margin: 20px 0;
+    font-size: 32px;
+    color: #333;
+}
+
+.requirements-card {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    max-width: 800px;
+    padding: 24px;
+    margin: 30px auto;
+}
+
+.requirements-title {
+    font-size: 1.25rem;
+    font-weight: bold;
+    margin-bottom: 20px;
+    margin-top: 3px;
+}
+
+.requirements-list {
+    padding-left: 20px;
+}
+
+.requirements-list li {
+    margin-bottom: 12px;
+    line-height: 1.5;
+    color: #555;
+}
+
+.retrain-upload-container {
+    border: 2px dashed #ccc;
+    border-radius: 5px;
+    padding: 50px 20px;
+    text-align: center;
+    margin: 30px auto;
+    max-width: 800px;
+    background-color: #fff;
+}
+
+.retrain-upload-icon {
+    font-size: 48px;
+    color: #999;
+    margin-bottom: 15px;
+}
+
+.retrain-upload-text {
+    color: #555;
+    margin-bottom: 10px;
+}
+
+.retrain-upload-link {
+    color: #2e7d32;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.retrain-upload-link:hover {
+    text-decoration: underline;
+}
+
+#file-selected {
+    display: none;
+    margin-top: 10px;
+    font-weight: bold;
+}
+
+.retrain-btn {
+    background-color: #2e7d32;
+    color: #fff;
+    border: none;
+    padding: 15px 0;
+    width: 100%;
+    font-size: 18px;
+    border-radius: 5px;
+    cursor: pointer;
+    max-width: 845px;
+    margin: 0 auto;
+    margin-bottom: 2.4rem;
+    display: block;
+}
+
+.retrain-btn:hover {
+    background-color: #81C784;
+    color: #fff;
+}
