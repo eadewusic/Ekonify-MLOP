@@ -26,29 +26,34 @@
         </nav>
     </header>
 
-    <div class="container">
-        <h1 class="title">Retrain Model</h1>
-
-        <form id="retrainForm" class="form-section">
-            <div class="form-group">
-                <label for="category">Category</label>
-                <input type="text" id="category" name="category" required placeholder="e.g. Organic Waste" />
+    <div class="retrain-container">
+        <h1 class="retrain-title">Model Retraining</h1>
+    
+        <div class="requirements-card">
+            <h2 class="requirements-title">Upload Requirements</h2>
+            <ul class="requirements-list">
+                <li>ZIP file containing labeled waste images</li>
+                <li>Images must be in JPEG, PNG, or WebP format</li>
+                <li>Each image should be in its respective category folder</li>
+                <li>Maximum file size: 50MB</li>
+            </ul>
+        </div>
+    
+        <div class="upload-area" id="dropZone">
+            <div class="retrain-upload-icon">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 17V7M12 7L8 11M12 7L16 11" stroke="#888" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round" />
+                    <path
+                        d="M20 21H4C3.44772 21 3 20.5523 3 20V4C3 3.44772 3.44772 3 4 3H20C20.5523 3 21 3.44772 21 4V20C21 20.5523 20.5523 21 20 21Z"
+                        stroke="#888" stroke-width="2" />
+                </svg>
             </div>
-
-            <div class="form-group">
-                <label for="images">Upload Images</label>
-                <input type="file" id="images" name="images" multiple accept="image/*" required />
-                <p class="note">Select 5–10 images of the category</p>
-            </div>
-
-            <button type="submit" class="predict-btn">Submit for Retraining</button>
-        </form>
-
-        <div id="retrainStatus" class="status hidden"></div>
+            <p class="retrain-upload-text">Drag and drop your ZIP file here, or <a href="#" class="browse-link">browse</a></p>
+        </div>
+    
+        <button class="retrain-upload-button" id="uploadButton">Start Upload</button>
     </div>
-
-    <script src="/front-end/script.js"></script>
-</body>
 
 <!-- footer section -->
 
