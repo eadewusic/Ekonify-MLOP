@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Retrain - Waste Classifier</title>
+    <link rel="stylesheet" href="../style.css" />
+</head>
+
+<body>
+    <div class="container">
+        <h1 class="title">Retrain Model</h1>
+
+        <form id="retrainForm" class="form-section">
+            <div class="form-group">
+                <label for="category">Category</label>
+                <input type="text" id="category" name="category" required placeholder="e.g. Organic Waste" />
+            </div>
+
+            <div class="form-group">
+                <label for="images">Upload Images</label>
+                <input type="file" id="images" name="images" multiple accept="image/*" required />
+                <p class="note">Select 5–10 images of the category</p>
+            </div>
+
+            <button type="submit" class="predict-btn">Submit for Retraining</button>
+        </form>
+
+        <div id="retrainStatus" class="status hidden"></div>
+    </div>
+
+    <script src="/front-end/script.js"></script>
+</body>
+
+</html>

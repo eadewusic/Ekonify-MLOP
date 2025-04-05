@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ekonify - Waste Classification</title>
+    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"/>
+</head>
+
+<body>
+    <header>
+        <div>
+            <a href="/" class="logo">
+                <i class="fa-solid fa-recycle"></i> 
+                <span>Ekonify</span>
+            </a>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="./predict.html">Predict</a></li>
+                <li><a href="./retrain.html">Retrain</a></li>
+                <li><a href="./visualization.html">Visualization</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- hero section -->
+
+    <section class="hero">
+        <div class="hero-content">
+            <h1>Revolutionizing Waste Classification for a Sustainable Future</h1>
+            <p>Harness the power of AI to accurately classify waste, optimize recycling <br> processes, and make a real
+                environmental impact.</p>
+            <div class="buttons">
+                <button id="btn1"><a href="./predict.html">Start Classifying</a></button>
+                <button id="btn2"><a href="./visualization.html">View Impact</a></button>
+            </div>
+        </div>
+        <div class="hero-image">
+            <img src="/front-end/images/waste-bins.avif" alt="Colored waste bins">
+        </div>
+    </section>
+
+    <!-- key features section -->
+
+    <section class="features">
+        <h2>Key Features</h2>
+        <div class="feature-cards">
+            <div class="card">
+                <div class="icon-container">
+                    <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path d="M12 2c1.1 0 2 .9 2 2v8h2v2h-2v6c0 1.1-.9 2-2 2s-2-.9-2-2v-6H8v-2h2V4c0-1.1.9-2 2-2z"
+                            fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        <path d="M20 12H4" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"
+                            stroke-linejoin="round" />
+                    </svg>
+                </div>
+                <h3>AI-Powered Classification</h3>
+                <p>Advanced machine learning algorithms for accurate waste classification with real-time processing.</p>
+            </div>
+            <div class="card">
+                <div class="icon-container">
+                    <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="10" fill="none" stroke="white" stroke-width="2" />
+                        <path
+                            d="M12 2v4m0 16v-4m10-6h-4m-16 0h4m12.8-5.2l-2.8 2.8m-14 14l2.8-2.8m14 0l-2.8-2.8m-14 14l2.8-2.8"
+                            fill="none" stroke="white" stroke-width="2" stroke-linecap="round" />
+                    </svg>
+                </div>
+                <h3>Model Retraining</h3>
+                <p>Continuously improve classification accuracy with new data and automated model updates.</p>
+            </div>
+            <div class="card">
+                <div class="icon-container">
+                    <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <rect x="2" y="12" width="4" height="8" fill="white" />
+                        <rect x="10" y="8" width="4" height="12" fill="white" />
+                        <rect x="18" y="4" width="4" height="16" fill="white" />
+                        <path d="M2 20h20" fill="none" stroke="white" stroke-width="2" />
+                    </svg>
+                </div>
+                <h3>Data Visualization</h3>
+                <p>Comprehensive analytics and insights to track environmental impact and system performance.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- environmental section -->
+
+    <section class="impact">
+        <h2>Our Environmental Impact</h2>
+        <div class="impact-metrics">
+            <div class="metric">
+                <h3><span id="items-counter">0</span><span>+</span></h3>
+                <p>Items Classified</p>
+            </div>
+            <div class="metric">
+                <h3><span id="tons-counter">0+</span><span>+</span></h3>
+                <p>Tons CO<sub>2</sub> Saved</p>
+            </div>
+            <div class="metric">
+                <h3><span id="accuracy-counter">0</span>%</h3>
+                <p>Classification Accuracy</p>
+            </div>
+        </div>
+    </section>
+    
+    <!-- footer section -->
+
+    <footer>
+        <div>
+            <p>&copy; 2025 Ekonify. All rights reserved.</p>
+            <p>made with 🤍 by <a href="https://linktr.ee/climiradi">Eunice <> Climiradi</a></p>
+        </div>
+    </footer>
+    <script src="/front-end/script.js"></script>
+</body>
+
+</html>
