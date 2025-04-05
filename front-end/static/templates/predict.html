@@ -29,28 +29,39 @@
     <div class="predict-container">
         <h1 class="predict-title">Waste Classification</h1>
     
-        <div class="upload-container">
-            <div class="upload-icon">
-                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="1.5"
-                    stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                    <polyline points="17 8 12 3 7 8"></polyline>
-                    <line x1="12" y1="3" x2="12" y2="15"></line>
-                </svg>
-            </div>
-            <p class="upload-text">
-                Drag and drop your image here, or <a href="#" class="upload-link">browse</a>
-            </p>
-            <p class="supported-formats">Supported formats: JPEG, PNG, WebP (max 5MB)</p>
+        <form class="upload-container" id="upload-form" enctype="multipart/form-data" method="POST" action="/predict">
+            <input type="file" id="file-upload" name="file" accept="image/jpeg,image/png,image/webp"
+                style="display: none;" />
+    
+            <label for="file-upload" id="drop-zone">
+                <div class="upload-icon">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="1.5"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="17 8 12 3 7 8"></polyline>
+                        <line x1="12" y1="3" x2="12" y2="15"></line>
+                    </svg>
+                </div>
+                <p class="upload-text">
+                    Drag and drop your image here, or <span class="upload-link">browse</span>
+                </p>
+                <p class="supported-formats">Supported formats: JPEG, PNG, WebP (max 5MB)</p>
+            </label>
+        </form>
+    
+        <!-- Image Preview -->
+        <div id="image-preview" style="text-align: center; margin-top: 20px; margin-bottom: 20px;">
+            <!-- Preview will be inserted here -->
         </div>
     
-        <button class="predict-btn">
-            <a href="/">Predict</a>
-        </button>
+        <!-- Display Prediction and Confidence -->
+        <div id="prediction-result" style="text-align: center; margin-top: 20px; display: none;">
+            <p id="predicted-class">Predicted Class: <span></span></p>
+            <p id="confidence">Confidence: <span></span></p>
+        </div>
+    
+        <button type="submit" class="predict-btn" form="upload-form">Predict</button>
     </div>
-
-    <script src="/front-end/script.js"></script>
-</body>
 
 <!-- footer section -->
 
