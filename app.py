@@ -6,13 +6,13 @@ import io
 
 app = FastAPI()
 
-# Load your trained Keras model
+# Load trained model
 MODEL_PATH = "./models/baseline_cnn.pkl"
 model = tf.keras.models.load_model(MODEL_PATH)
-model.summary()  # Optional, to confirm the model loads correctly
+model.summary()  # confirm the model loads correctly
 
-# Define your class names (update this list based on your trained model's classes)
-class_names = ['battery', 'biological', 'brown-glass', 'cardboard', 'clothes', 'green-glass', 'metal', 'paper', 'plastic', 'shoes', 'trash', 'white-glass']  # Replace with your actual class names
+# Define class names (update this list based on trained model's classes)
+class_names = ['battery', 'biological', 'brown-glass', 'cardboard', 'clothes', 'green-glass', 'metal', 'paper', 'plastic', 'shoes', 'trash', 'white-glass'] 
 
 # Prediction function
 def predict(image: Image.Image):
