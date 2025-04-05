@@ -278,7 +278,7 @@ footer a {
     }
 }
 
-/* ---- retrain page --- */
+/* ---- predict page --- */
 
 .predict-container {
     max-width: 1200px;
@@ -355,12 +355,5 @@ footer a {
     color: #fff;
 }
 
-/* ---- visualisation page --- */
+/* ---- retrain page --- */
 
-canvas {
-    max-width: 100%;
-    background-color: #fff;
-    border-radius: 8px;
-    padding: 1rem;
-    box-shadow: 0 0 8px rgba(0, 0, 0, 0.05);
-}
