@@ -7,7 +7,7 @@ import io
 app = FastAPI()
 
 # Load your trained Keras model
-MODEL_PATH = "./models/baseline_cnn.keras"
+MODEL_PATH = "./models/baseline_cnn.pkl"
 model = tf.keras.models.load_model(MODEL_PATH)
 model.summary()  # Optional, to confirm the model loads correctly
 

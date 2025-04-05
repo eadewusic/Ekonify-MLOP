@@ -2,49 +2,65 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Predict - Ekonify</title>
-    <link rel="stylesheet" href="../style.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ekonify - Waste Classification</title>
+    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
 </head>
 
 <body>
-    <div class="container">
-        <h1 class="title">Waste Classification</h1>
+    <header>
+        <div>
+            <a href="./home.html" class="logo">
+                <i class="fa-solid fa-recycle"></i>
+                <span>Ekonify</span>
+            </a>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="./predict.html">Predict</a></li>
+                <li><a href="./retrain.html">Retrain</a></li>
+                <li><a href="./visualization.html">Visualization</a></li>
+            </ul>
+        </nav>
+    </header>
 
-        <div id="dropzone" class="dropzone">
-            <img id="preview" class="preview hidden" alt="Preview" />
-            <div id="upload-icon" class="upload-icon">📤</div>
-            <p>
-                Drag and drop your image here, or
-                <label class="browse-btn">
-                    browse
-                    <input type="file" accept="image/jpeg,image/png,image/webp" hidden id="fileInput" />
-                </label>
+    <div class="predict-container">
+        <h1 class="predict-title">Waste Classification</h1>
+    
+        <div class="upload-container">
+            <div class="upload-icon">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="1.5"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="17 8 12 3 7 8"></polyline>
+                    <line x1="12" y1="3" x2="12" y2="15"></line>
+                </svg>
+            </div>
+            <p class="upload-text">
+                Drag and drop your image here, or <a href="#" class="upload-link">browse</a>
             </p>
-            <p class="note">Supported formats: JPEG, PNG, WebP (max 5MB)</p>
+            <p class="supported-formats">Supported formats: JPEG, PNG, WebP (max 5MB)</p>
         </div>
-
-        <div id="error" class="error hidden"></div>
-
-        <button id="predictBtn" class="predict-btn" disabled>Predict</button>
-
-        <div id="result" class="result-card hidden">
-            <h2>Results</h2>
-            <p><strong>Category:</strong> <span id="category"></span></p>
-            <p><strong>Confidence:</strong></p>
-            <div class="confidence-bar">
-                <div id="confidenceFill" class="confidence-fill"></div>
-            </div>
-            <p id="confidencePercent" class="text-right"></p>
-            <div>
-                <p><strong>Recommendations:</strong></p>
-                <ul id="recommendations" class="recommendations"></ul>
-            </div>
-        </div>
+    
+        <button class="predict-btn">
+            <a href="/">Predict</a>
+        </button>
     </div>
 
     <script src="/front-end/script.js"></script>
+</body>
+
+<!-- footer section -->
+
+<footer>
+    <div>
+        <p>&copy; 2025 Ekonify. All rights reserved.</p>
+        <p>made with 🤍 by <a href="https://linktr.ee/climiradi">Eunice <> Climiradi</a></p>
+    </div>
+</footer>
+<script src="/front-end/script.js"></script>
 </body>
 
 </html>
