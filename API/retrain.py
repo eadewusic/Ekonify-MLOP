@@ -221,12 +221,6 @@ class ModelTrainer:
             with open(new_model_path, 'wb') as model_file:
                 pickle.dump(model, model_file)
             
-            # Get the final accuracy, loss, and validation metrics, rounded to 4 decimal places
-            final_accuracy = round(history.history['accuracy'][-1], 4)
-            final_val_accuracy = round(history.history['val_accuracy'][-1], 4)
-            final_loss = round(history.history['loss'][-1], 4)
-            final_val_loss = round(history.history['val_loss'][-1], 4)
-            
             return {
                 "message": "Model retrained successfully",
                 "model_path": str(new_model_path),
