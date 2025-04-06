@@ -10,3 +10,6 @@ joblib
 tqdm
 pipdeptree
 pymongo
+fastapi
+uvicorn
+python-multipart

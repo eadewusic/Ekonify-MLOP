@@ -212,24 +212,33 @@ class ModelTrainer:
             recall_macro = round(recall_macro, 4)
             f1_macro = round(f1_macro, 4)
 
-            # Save retrained model using pickle
+            # Save retrained model inside 'user_retrained_models' directory
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            new_model_path = self.manager.models_base_path / f"{model_name}_retrained_{timestamp}.pkl"
+            retrained_dir = self.manager.models_base_path / "user_retrained_models"
+            retrained_dir.mkdir(parents=True, exist_ok=True)  # Create the directory if it doesn't exist
+
+            new_model_path = retrained_dir / f"{model_name}_retrained_{timestamp}.pkl"
             with open(new_model_path, 'wb') as model_file:
                 pickle.dump(model, model_file)
+            
+            # Get the final accuracy, loss, and validation metrics, rounded to 4 decimal places
+            final_accuracy = round(history.history['accuracy'][-1], 4)
+            final_val_accuracy = round(history.history['val_accuracy'][-1], 4)
+            final_loss = round(history.history['loss'][-1], 4)
+            final_val_loss = round(history.history['val_loss'][-1], 4)
             
             return {
                 "message": "Model retrained successfully",
                 "model_path": str(new_model_path),
-                "metrics": {
+                "model_performance_metrics": {
                     "epochs": 3,
-                    "precision_macro": precision_macro,
-                    "recall_macro": recall_macro,
-                    "f1_macro": f1_macro,
                     "final_accuracy": float(history.history['accuracy'][-1]),
                     "final_val_accuracy": float(history.history['val_accuracy'][-1]),
                     "final_loss": float(history.history['loss'][-1]),
-                    "final_val_loss": float(history.history['val_loss'][-1])
+                    "final_val_loss": float(history.history['val_loss'][-1]),
+                    "precision_macro": precision_macro,
+                    "recall_macro": recall_macro,
+                    "f1_score_macro": f1_macro
                 }
             }
         except HTTPException as e:
