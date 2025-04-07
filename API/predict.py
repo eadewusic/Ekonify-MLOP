@@ -6,11 +6,20 @@ import io
 import pickle
 from database import Database
 import logging
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(
     title="Ekonify Predict API",
     description="API for image prediction with automatic result storage",
     version="2.0"
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # For development - restrict this in production
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 # Logger configuration

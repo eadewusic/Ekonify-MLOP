@@ -6,6 +6,7 @@ from datetime import datetime
 from pathlib import Path
 import shutil
 import pickle
+import json
 from tensorflow.keras.models import Model
 import tensorflow as tf
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
@@ -14,11 +15,20 @@ import numpy as np
 from database import Database
 import io
 from PIL import Image
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(
     title="Ekonify Retrain API",
     description="Retrain models using uploaded datasets or existing database data.",
     version="2.0"
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # For development - restrict this in production
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 # Logger configuration
@@ -643,6 +653,93 @@ async def retrain_from_database(
     except Exception as e:
         logger.error(f"Retraining error: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Retraining failed: {str(e)}")
+
+# New endpoint for model info
+@app.get("/models/{model_name}/latest")
+async def get_latest_model_info(model_name: str):
+    """Get information about the latest model for a base model name"""
+    try:
+        result = model_manager.get_latest_retrained_model(model_name)
+        if not result:
+            raise HTTPException(
+                status_code=404, 
+                detail=f"No retrained model found for {model_name}"
+            )
+            
+        model, model_data = result
+        
+        # We don't want to return the actual model binary in the response
+        if "model_binary" in model_data:
+            del model_data["model_binary"]
+        
+        # Convert ObjectId to string
+        if "_id" in model_data:
+            model_data["_id"] = str(model_data["_id"])
+        
+        if "model_file_id" in model_data:
+            model_data["model_file_id"] = str(model_data["model_file_id"])
+        
+        # Convert any other MongoDB-specific types
+        model_data = json.loads(json.dumps(model_data, default=str))
+        
+        return model_data
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        logger.error(f"Error getting model info: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to get model info: {str(e)}")
+
+# Add endpoint to list datasets
+@app.get("/datasets")
+async def get_datasets():
+    """Get list of all datasets in the database"""
+    try:
+        datasets = model_manager.db.get_datasets_metadata()
+        return datasets
+    except Exception as e:
+        logger.error(f"Error getting datasets: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to get datasets: {str(e)}")
+
+# Add endpoint to list all models
+@app.get("/models")
+async def get_models():
+    """Get list of all models (base and retrained)"""
+    try:
+        # List models from file system (base models)
+        base_models = []
+        try:
+            if model_manager.models_base_path.exists():
+                for file_path in model_manager.models_base_path.glob("*.pkl"):
+                    if file_path.is_file():
+                        base_models.append({
+                            "name": file_path.stem,
+                            "type": "base",
+                            "path": str(file_path)
+                        })
+        except Exception as e:
+            logger.error(f"Error listing base models: {e}")
+        
+        # List retrained models from database
+        retrained_models = []
+        try:
+            db_models = model_manager.db.list_available_models()
+            for model in db_models:
+                retrained_models.append({
+                    "name": model.get("model_name", "Unknown"),
+                    "type": "retrained",
+                    "base_model": model.get("base_model_name", "Unknown"),
+                    "created_at": model.get("timestamp", datetime.now()).strftime("%Y-%m-%d %H:%M:%S") 
+                    if isinstance(model.get("timestamp"), datetime) else str(model.get("timestamp", "")),
+                    "metrics": model.get("metrics", {})
+                })
+        except Exception as e:
+            logger.error(f"Error listing retrained models: {e}")
+        
+        # Combine and return
+        return base_models + retrained_models
+    except Exception as e:
+        logger.error(f"Error getting models: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to get models: {str(e)}")
 
 @app.get("/")
 async def root():

@@ -1,4 +1,7 @@
 document.addEventListener("DOMContentLoaded", () => {
+  // API base URL - change this for production deployment
+  const API_BASE_URL = "http://localhost:8000"; // Your API server URL
+
   // Check if we're on the home page with counters
   const homeItemsCounter = document.getElementById("items-counter");
   const homeTonsCounter = document.getElementById("tons-counter");
@@ -193,9 +196,16 @@ document.addEventListener("DOMContentLoaded", () => {
         formData.append("file", file);
 
         // Determine which endpoint to use
-        let endpoint = "/predict";
+        let endpoint = `${API_BASE_URL}/predict/`;
         if (isRetrainPage) {
-          endpoint = "/retrain";
+          endpoint = `${API_BASE_URL}/upload`;
+
+          // Add model name for retraining
+          const modelSelect = document.getElementById("model-select");
+          if (modelSelect) {
+            formData.append("model_name", modelSelect.value);
+          }
+
           if (retrainBtn) {
             retrainBtn.textContent = "Uploading...";
             retrainBtn.disabled = true;
@@ -208,6 +218,10 @@ document.addEventListener("DOMContentLoaded", () => {
             body: formData,
           });
 
+          if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+          }
+
           const result = await response.json();
 
           if (isRetrainPage) {
@@ -218,14 +232,30 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
             if (response.ok) {
-              alert("Model retraining started successfully!");
-              resetFileInput();
+              // Show progress UI with real results
+              document.getElementById("new-dataset-tab").style.display = "none";
+              const progressContainer =
+                document.getElementById("progress-container");
+              progressContainer.style.display = "block";
+
+              const progressBar = document.getElementById("progress-bar");
+              const progressStatus = document.getElementById("progress-status");
+
+              // Update with real training results
+              progressBar.style.width = "100%";
+              progressStatus.textContent = "Training complete!";
+
+              // Display the real results
+              displayRetrainingResults(result.results);
             } else {
-              alert(`Error: ${result.message || "Something went wrong."}`);
+              alert(`Error: ${result.detail || "Something went wrong."}`);
             }
           } else {
             // Handle predict response
-            displayPrediction(result);
+            displayPrediction({
+              class: result.prediction,
+              confidence: result.confidence,
+            });
           }
         } catch (error) {
           console.error(
@@ -263,10 +293,8 @@ document.addEventListener("DOMContentLoaded", () => {
         .getElementById("confidence")
         .querySelector("span");
 
-      predictedClass.textContent = result.class || "Unknown"; // Replace with model's actual class field
-      confidence.textContent = result.confidence
-        ? `${(result.confidence * 100).toFixed(2)}%`
-        : "N/A"; // Assuming confidence is in decimal form
+      predictedClass.textContent = result.class || "Unknown";
+      confidence.textContent = result.confidence || "N/A";
     }
   }
 
@@ -387,6 +415,8 @@ document.addEventListener("DOMContentLoaded", () => {
  * Sets up the Continue Training tab functionality
  */
 function setupContinueTrainingTab() {
+  const API_BASE_URL = "http://localhost:8000"; // Match the URL from top of file
+
   const continueModelSelect = document.getElementById("continue-model-select");
   const modelInfoPlaceholder = document.getElementById(
     "model-info-placeholder"
@@ -411,26 +441,28 @@ function setupContinueTrainingTab() {
     modelInfoPlaceholder.textContent = "Loading model information...";
 
     try {
-      // In production, replace with real API call to /api/models/:modelName/latest
-      await simulateApiCall(800);
+      // Call real API to get model info
+      const response = await fetch(
+        `${API_BASE_URL}/models/${modelName}/latest`
+      );
+      if (!response.ok) {
+        throw new Error("Failed to fetch model info");
+      }
 
-      // Mock data - replace with actual API response
-      const mockData = {
-        model_name: `${modelName}_retrained_20250321_142536`,
-        trained_on: "March 21, 2025",
-        epochs: 5,
-        accuracy: 0.923,
-      };
+      const modelData = await response.json();
 
-      // Update UI with model info
+      // Update UI with real model info
       document.getElementById("last-model-name").textContent =
-        mockData.model_name;
-      document.getElementById("last-model-date").textContent =
-        mockData.trained_on;
+        modelData.model_name;
+      document.getElementById("last-model-date").textContent = new Date(
+        modelData.timestamp
+      ).toLocaleDateString();
       document.getElementById("last-model-epochs").textContent =
-        mockData.epochs;
-      document.getElementById("last-model-accuracy").textContent =
-        (mockData.accuracy * 100).toFixed(2) + "%";
+        modelData.metrics?.epochs || "Unknown";
+      document.getElementById("last-model-accuracy").textContent = modelData
+        .metrics?.final_accuracy
+        ? `${(modelData.metrics.final_accuracy * 100).toFixed(2)}%`
+        : "Unknown";
 
       modelInfoPlaceholder.style.display = "none";
       modelInfoDetails.style.display = "block";
@@ -460,34 +492,40 @@ function setupContinueTrainingTab() {
     const progressStatus = document.getElementById("progress-status");
     const resultsContainer = document.getElementById("results-container");
 
-    progressBar.style.width = "0%";
+    progressBar.style.width = "10%";
     progressStatus.textContent = "Initializing training...";
     resultsContainer.style.display = "none";
 
     try {
-      // Simulate progress
-      await simulateTrainingProgress(progressBar, progressStatus);
+      // Create form data for the real API call
+      const formData = new FormData();
+      formData.append("model_name", modelName);
+      formData.append("additional_epochs", additionalEpochs);
 
-      // Mock training results - replace with actual API response
-      const previousEpochs = parseInt(
-        document.getElementById("last-model-epochs").textContent || "0"
-      );
-      const mockResults = {
-        model_name: `${modelName}_retrained_extended_20250407_103045`,
-        total_epochs: previousEpochs + parseInt(additionalEpochs),
-        model_performance_metrics: {
-          final_accuracy: 0.953,
-          final_val_accuracy: 0.927,
-          f1_score_macro: 0.9281,
-        },
-      };
+      // Call the real continue-training API
+      const response = await fetch(`${API_BASE_URL}/continue-training`, {
+        method: "POST",
+        body: formData,
+      });
 
-      // Display results
-      displayRetrainingResults(mockResults);
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || "Training failed");
+      }
+
+      // Get the real response data
+      const result = await response.json();
+
+      // Show complete progress
+      progressBar.style.width = "100%";
+      progressStatus.textContent = "Training complete!";
+
+      // Display real results
+      displayRetrainingResults(result);
     } catch (error) {
       console.error("Error during training:", error);
       progressStatus.textContent =
-        "Error occurred during training. Please try again.";
+        "Error occurred during training: " + error.message;
       progressBar.style.backgroundColor = "#f44336";
     }
   });
@@ -497,86 +535,85 @@ function setupContinueTrainingTab() {
  * Sets up the Use Existing Datasets tab functionality
  */
 function setupExistingDatasetsTab() {
+  const API_BASE_URL = "http://localhost:8000"; // Match the URL from top of file
+
   const datasetsContainer = document.getElementById("datasets-container");
   const datasetsLoading = document.getElementById("datasets-loading");
   const retrainFromDbBtn = document.getElementById("retrain-from-db-btn");
 
   if (!datasetsContainer || !retrainFromDbBtn) return;
 
-  // Simulate fetching datasets - in production replace with real API call
-  setTimeout(() => {
-    // Mock dataset data
-    const mockDatasets = [
-      {
-        id: "dataset_20250324_143256",
-        upload_date: "March 24, 2025",
-        size: "23.4 MB",
-        categories: ["paper", "plastic", "metal", "glass", "organic"],
-        image_count: 1247,
-      },
-      {
-        id: "dataset_20250318_092145",
-        upload_date: "March 18, 2025",
-        size: "15.7 MB",
-        categories: ["paper", "plastic", "metal", "glass"],
-        image_count: 875,
-      },
-      {
-        id: "dataset_20250310_164532",
-        upload_date: "March 10, 2025",
-        size: "30.2 MB",
-        categories: [
-          "paper",
-          "plastic",
-          "metal",
-          "glass",
-          "organic",
-          "electronic",
-        ],
-        image_count: 1653,
-      },
-    ];
+  // Load real datasets from API
+  loadDatasets();
 
-    // Hide loading indicator
+  async function loadDatasets() {
     if (datasetsLoading) {
-      datasetsLoading.style.display = "none";
+      datasetsLoading.style.display = "block";
     }
 
-    if (mockDatasets.length === 0) {
+    try {
+      const response = await fetch(`${API_BASE_URL}/datasets`);
+      if (!response.ok) {
+        throw new Error("Failed to fetch datasets");
+      }
+
+      const datasets = await response.json();
+
+      // Hide loading indicator
+      if (datasetsLoading) {
+        datasetsLoading.style.display = "none";
+      }
+
+      if (datasets.length === 0) {
+        datasetsContainer.innerHTML = `
+          <div class="info-alert" style="background-color: #fff9c4; border-left-color: #fbc02d; color: #7b5800;">
+            No datasets found in the database. Please upload a dataset first.
+          </div>
+        `;
+        return;
+      }
+
+      let datasetsHTML = "";
+      datasets.forEach((dataset) => {
+        // Format size in MB or KB
+        const sizeInMB = (dataset.size_bytes / (1024 * 1024)).toFixed(2);
+        const formattedSize =
+          sizeInMB < 0.01
+            ? `${(dataset.size_bytes / 1024).toFixed(2)} KB`
+            : `${sizeInMB} MB`;
+
+        datasetsHTML += `
+          <div class="dataset-card">
+            <div class="dataset-header">
+              <div class="dataset-name">${dataset.filename}</div>
+              <div class="dataset-size">${formattedSize}</div>
+            </div>
+            <div class="dataset-info">
+              <div><strong>Uploaded:</strong> ${dataset.timestamp}</div>
+              <div><strong>Dataset ID:</strong> ${dataset.id}</div>
+            </div>
+          </div>
+        `;
+      });
+
+      // Keep the loading container but hide it, then add the datasets
+      const loadingContainer = datasetsLoading ? datasetsLoading.outerHTML : "";
+      datasetsContainer.innerHTML = loadingContainer + datasetsHTML;
+      if (datasetsLoading) {
+        datasetsLoading.style.display = "none";
+      }
+    } catch (error) {
+      console.error("Error fetching datasets:", error);
+      if (datasetsLoading) {
+        datasetsLoading.style.display = "none";
+      }
       datasetsContainer.innerHTML = `
-        <div class="info-alert" style="background-color: #fff9c4; border-left-color: #fbc02d; color: #7b5800;">
-          No datasets found in the database. Please upload a dataset first.
+        <div class="info-alert" style="background-color: #ffebee; border-left-color: #f44336; color: #b71c1c;">
+          Error loading datasets: ${error.message}
         </div>
       `;
-      return;
     }
-
-    let datasetsHTML = "";
-    mockDatasets.forEach((dataset) => {
-      datasetsHTML += `
-        <div class="dataset-card">
-          <div class="dataset-header">
-            <div class="dataset-name">${dataset.id}</div>
-            <div class="dataset-size">${dataset.size}</div>
-          </div>
-          <div class="dataset-info">
-            <div><strong>Uploaded:</strong> ${dataset.upload_date}</div>
-            <div><strong>Images:</strong> ${dataset.image_count}</div>
-            <div><strong>Categories:</strong> ${dataset.categories.join(
-              ", "
-            )}</div>
-          </div>
-        </div>
-      `;
-    });
-
-    // Keep the loading container but hide it, then add the datasets
-    const loadingContainer = datasetsLoading ? datasetsLoading.outerHTML : "";
-    datasetsContainer.innerHTML = loadingContainer + datasetsHTML;
-    if (datasetsLoading) {
-      datasetsLoading.style.display = "none";
-    }
-  }, 1500);
+  }
 
   retrainFromDbBtn.addEventListener("click", async function () {
     const modelName = document.getElementById("existing-model-select").value;
@@ -601,26 +638,38 @@ function setupExistingDatasetsTab() {
     resultsContainer.style.display = "none";
 
     try {
-      // Simulate progress with more detailed status messages
-      await simulateRetrainingProgress(progressBar, progressStatus, epochs);
+      // Create form data for the real API call
+      const formData = new FormData();
+      formData.append("model_name", modelName);
 
-      // Mock training results
-      const mockResults = {
-        model_name: `${modelName}_retrained_20250407_152312`,
-        epochs: parseInt(epochs),
-        model_performance_metrics: {
-          final_accuracy: 0.968,
-          final_val_accuracy: 0.942,
-          f1_score_macro: 0.951,
-        },
-      };
+      // Update progress
+      progressBar.style.width = "10%";
+      progressStatus.textContent = "Sending request to server...";
+
+      // Call the real retrain-from-db API
+      const response = await fetch(`${API_BASE_URL}/retrain-from-db`, {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || "Retraining failed");
+      }
+
+      // Get response data
+      const result = await response.json();
+
+      // Update progress to complete
+      progressBar.style.width = "100%";
+      progressStatus.textContent = "Retraining complete!";
 
       // Display results
-      displayRetrainingResults(mockResults);
+      displayRetrainingResults(result.results);
     } catch (error) {
       console.error("Error during training:", error);
       progressStatus.textContent =
-        "Error occurred during training. Please try again.";
+        "Error occurred during training: " + error.message;
       progressBar.style.backgroundColor = "#f44336";
     }
   });
@@ -667,13 +716,14 @@ function setupProgressAndResults() {
  * Sets up the original upload form to work with the tabbed interface
  */
 function setupOriginalUploadForm() {
+  const API_BASE_URL = "http://localhost:8000"; // Match the URL from top of file
+
   const uploadForm = document.getElementById("upload-form");
   const uploadBtn = document.querySelector('.retrain-btn[form="upload-form"]');
 
   if (!uploadForm || !uploadBtn) return;
 
   // Update the original form submission
-  const originalSubmitHandler = uploadForm.onsubmit;
   uploadForm.addEventListener("submit", function (e) {
     e.preventDefault();
 
@@ -706,15 +756,31 @@ function setupOriginalUploadForm() {
     progressStatus.textContent = "Uploading dataset...";
     resultsContainer.style.display = "none";
 
-    // Simulate upload and training process
-    simulateUploadAndTraining(progressBar, progressStatus, modelName)
-      .then((mockResults) => {
-        displayRetrainingResults(mockResults);
+    // Make the real API call
+    fetch(`${API_BASE_URL}/upload`, {
+      method: "POST",
+      body: formData,
+    })
+      .then((response) => {
+        // Update progress based on response
+        if (!response.ok) {
+          return response.json().then((data) => {
+            throw new Error(data.detail || "Upload failed");
+          });
+        }
+
+        progressBar.style.width = "100%";
+        progressStatus.textContent = "Upload and training complete!";
+
+        return response.json();
+      })
+      .then((data) => {
+        // Display results
+        displayRetrainingResults(data.results);
       })
       .catch((error) => {
         console.error("Error during upload/training:", error);
-        progressStatus.textContent =
-          "Error occurred during upload or training. Please try again.";
+        progressStatus.textContent = "Error: " + error.message;
         progressBar.style.backgroundColor = "#f44336";
       });
   });
@@ -750,113 +816,4 @@ function displayRetrainingResults(results) {
 
   // Show results container
   resultsContainer.style.display = "block";
-}
-
-/**
- * Simulates an API call with a delay
- */
-function simulateApiCall(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-/**
- * Simulates training progress with updates to the progress bar and status message
- */
-async function simulateTrainingProgress(
-  progressBar,
-  statusElement,
-  intervalMs = 500
-) {
-  for (let i = 0; i <= 100; i += 10) {
-    await simulateApiCall(intervalMs);
-    progressBar.style.width = `${i}%`;
-
-    if (i === 10) statusElement.textContent = "Loading model from database...";
-    if (i === 30) statusElement.textContent = "Preparing datasets...";
-    if (i === 50) statusElement.textContent = "Training in progress...";
-    if (i === 80) statusElement.textContent = "Evaluating model performance...";
-    if (i === 100) statusElement.textContent = "Training complete!";
-  }
-}
-
-/**
- * Simulates retraining progress with more detailed status updates
- */
-async function simulateRetrainingProgress(
-  progressBar,
-  statusElement,
-  epochs,
-  intervalMs = 400
-) {
-  for (let i = 0; i <= 100; i += 5) {
-    await simulateApiCall(intervalMs);
-    progressBar.style.width = `${i}%`;
-
-    if (i === 5) statusElement.textContent = "Loading model from storage...";
-    if (i === 15)
-      statusElement.textContent = "Fetching datasets from database...";
-    if (i === 25) statusElement.textContent = "Preparing combined dataset...";
-    if (i === 40)
-      statusElement.textContent = "Setting up model architecture...";
-    if (i === 50)
-      statusElement.textContent = `Training in progress (epoch 1/${epochs})...`;
-    if (i === 70)
-      statusElement.textContent = `Training in progress (epoch ${Math.ceil(
-        epochs / 2
-      )}/${epochs})...`;
-    if (i === 90)
-      statusElement.textContent = `Training in progress (epoch ${epochs}/${epochs})...`;
-    if (i === 100) statusElement.textContent = "Training complete!";
-  }
-}
-
-/**
- * Simulates the upload and training process for the original upload form
- */
-async function simulateUploadAndTraining(
-  progressBar,
-  statusElement,
-  modelName
-) {
-  // Upload phase (0-30%)
-  for (let i = 0; i <= 30; i += 5) {
-    await simulateApiCall(300);
-    progressBar.style.width = `${i}%`;
-
-    if (i === 5) statusElement.textContent = "Uploading dataset...";
-    if (i === 15) statusElement.textContent = "Validating dataset...";
-    if (i === 25) statusElement.textContent = "Processing dataset...";
-  }
-
-  // Training phase (30-100%)
-  for (let i = 35; i <= 100; i += 5) {
-    await simulateApiCall(400);
-    progressBar.style.width = `${i}%`;
-
-    if (i === 35) statusElement.textContent = "Loading model...";
-    if (i === 45)
-      statusElement.textContent = "Setting up training environment...";
-    if (i === 55)
-      statusElement.textContent = "Training in progress (epoch 1/5)...";
-    if (i === 65)
-      statusElement.textContent = "Training in progress (epoch 2/5)...";
-    if (i === 75)
-      statusElement.textContent = "Training in progress (epoch 3/5)...";
-    if (i === 85)
-      statusElement.textContent = "Training in progress (epoch 4/5)...";
-    if (i === 95)
-      statusElement.textContent = "Training in progress (epoch 5/5)...";
-    if (i === 100) statusElement.textContent = "Training complete!";
-  }
-
-  // Return mock results
-  return {
-    model_name: `${modelName}_retrained_20250407_163415`,
-    total_epochs: 5,
-    model_performance_metrics: {
-      final_accuracy: 0.945,
-      final_val_accuracy: 0.922,
-      f1_score_macro: 0.934,
-    },
-  };
 }
