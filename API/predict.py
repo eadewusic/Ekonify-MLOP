@@ -9,7 +9,7 @@ import logging
 
 app = FastAPI(
     title="Ekonify Predict API",
-    description="API for image prediction with feedback collection",
+    description="API for image prediction with automatic result storage",
     version="2.0"
 )
 
@@ -52,10 +52,9 @@ def predict(image: Image.Image):
 @app.post("/predict/")
 async def predict_image(
     file: UploadFile = File(...),
-    store_result: bool = False,
     feedback: str = None
 ):
-    """Predict image class with option to store in database"""
+    """Predict image class and automatically store in database"""
     try:
         # Process image
         image_bytes = await file.read()
@@ -64,27 +63,28 @@ async def predict_image(
         # Get prediction
         predicted_class, confidence = predict(image)
         
-        # Store in database if requested
-        if store_result:
-            try:
-                image_id = db.insert_image(
-                    file_data=image_bytes,
-                    filename=file.filename,
-                    label=predicted_class,
-                    metadata={
-                        "confidence": confidence,
-                        "feedback": feedback or "",
-                        "prediction": predicted_class
-                    }
-                )
-                logger.info(f"Stored prediction in database with ID: {image_id}")
-            except Exception as e:
-                logger.error(f"Failed to store prediction: {e}")
+        # Always store in database
+        try:
+            image_id = db.insert_image(
+                file_data=image_bytes,
+                filename=file.filename,
+                label=predicted_class,
+                metadata={
+                    "confidence": confidence,
+                    "feedback": feedback or "",
+                    "prediction": predicted_class
+                }
+            )
+            logger.info(f"Stored prediction in database with ID: {image_id}")
+            stored_in_db = True
+        except Exception as e:
+            logger.error(f"Failed to store prediction: {e}")
+            stored_in_db = False
         
         return {
             "prediction": predicted_class,
             "confidence": f"{round(confidence * 100, 2)}%",
-            "stored_in_db": store_result
+            "stored_in_db": stored_in_db
         }
     except UnidentifiedImageError:
         raise HTTPException(status_code=400, detail="Invalid image format.")
