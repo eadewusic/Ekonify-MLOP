@@ -28,47 +28,174 @@
 
     <div class="retrain-container">
         <h1 class="retrain-title">Model Retraining</h1>
-    
-        <div class="requirements-card">
-            <h2 class="requirements-title">Upload Requirements</h2>
-            <ul class="requirements-list">
-                <li>ZIP file containing labeled waste images</li>
-                <li>Images must be in JPEG, PNG, or WebP format</li>
-                <li>Each image should be in its respective category folder</li>
-                <li>Maximum file size: 50MB</li>
-            </ul>
+
+        <!-- Tabs navigation -->
+        <div class="retrain-tabs">
+            <div class="retrain-tab active" data-tab="new-dataset">Upload New Dataset</div>
+            <div class="retrain-tab" data-tab="continue-training">Continue Training</div>
+            <div class="retrain-tab" data-tab="existing-datasets">Use Existing Datasets</div>
         </div>
-    
-        <form class="retrain-upload-container" id="upload-form" enctype="multipart/form-data" method="POST" action="/predict">
-            <input type="file" id="file-upload" name="file" accept="image/jpeg,image/png,image/webp" style="display: none;" />
-        
-            <label for="file-upload" id="drop-zone">
-                <div class="retrain-upload-icon">
-                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="1.5"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                        <polyline points="17 8 12 3 7 8"></polyline>
-                        <line x1="12" y1="3" x2="12" y2="15"></line>
-                    </svg>
+
+        <!-- Tab 1: Upload New Dataset (Original functionality) -->
+        <div class="retrain-tab-content active" id="new-dataset-tab">
+            <div class="requirements-card">
+                <h2 class="requirements-title">Upload Requirements</h2>
+                <ul class="requirements-list">
+                    <li>ZIP file containing labeled waste images</li>
+                    <li>Images must be in JPEG, PNG, or WebP format</li>
+                    <li>Each image should be in its respective category folder</li>
+                    <li>Maximum file size: 50MB</li>
+                </ul>
+            </div>
+
+            <div class="model-select-container">
+                <label for="model-select" class="model-select-label">Select Base Model:</label>
+                <select id="model-select" class="model-select">
+                    <option value="baseline_cnn" selected>Baseline CNN</option>
+                    <option value="mobilenet_v2">MobileNet V2</option>
+                    <option value="efficientnet_b0">EfficientNet B0</option>
+                </select>
+            </div>
+
+            <form class="retrain-upload-container" id="upload-form" enctype="multipart/form-data" method="POST"
+                action="/upload">
+                <input type="file" id="file-upload" name="file" accept=".zip" style="display: none;" />
+
+                <label for="file-upload" id="drop-zone">
+                    <div class="retrain-upload-icon">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="1.5"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="17 8 12 3 7 8"></polyline>
+                            <line x1="12" y1="3" x2="12" y2="15"></line>
+                        </svg>
+                    </div>
+                    <p class="retrain-upload-text">
+                        Drag and drop your ZIP file here, or <span class="retrain-upload-link">browse</span>
+                    </p>
+                </label>
+            </form>
+
+            <button type="submit" class="retrain-btn" form="upload-form">Start Retraining</button>
+        </div>
+
+        <!-- Tab 2: Continue Training -->
+        <div class="retrain-tab-content" id="continue-training-tab">
+            <div class="model-select-container">
+                <label for="continue-model-select" class="model-select-label">Base Model Name:</label>
+                <select id="continue-model-select" class="model-select">
+                    <option value="" selected disabled>Select a model</option>
+                    <option value="baseline_cnn">Baseline CNN</option>
+                    <option value="mobilenet_v2">MobileNet V2</option>
+                    <option value="efficientnet_b0">EfficientNet B0</option>
+                </select>
+            </div>
+
+            <div class="epochs-container">
+                <label for="additional-epochs" class="epochs-label">Additional Epochs:</label>
+                <input type="number" id="additional-epochs" class="epochs-input" min="1" max="20" value="3">
+            </div>
+
+            <div class="model-info-card">
+                <h3 class="model-info-title">Last Trained Model</h3>
+                <div id="model-info-placeholder" class="model-placeholder">
+                    No model information available. Please select a model first.
                 </div>
-                <p class="retrain-upload-text">
-                    Drag and drop your ZIP file here, or <span class="retrain-upload-link">browse</span>
-                </p>
-            </label>
-        </form>
-    
-        <button type="submit" class="retrain-btn" form="upload-form">Start Retraining</button>
+                <div id="model-info-details" style="display: none;">
+                    <div class="model-info-detail"><strong>Name:</strong> <span id="last-model-name">-</span></div>
+                    <div class="model-info-detail"><strong>Trained on:</strong> <span id="last-model-date">-</span>
+                    </div>
+                    <div class="model-info-detail"><strong>Previous epochs:</strong> <span
+                            id="last-model-epochs">-</span></div>
+                    <div class="model-info-detail"><strong>Accuracy:</strong> <span id="last-model-accuracy">-</span>
+                    </div>
+                </div>
+            </div>
+
+            <button id="continue-training-btn" class="retrain-btn">Continue Training</button>
+        </div>
+
+        <!-- Tab 3: Use Existing Datasets -->
+        <div class="retrain-tab-content" id="existing-datasets-tab">
+            <div class="info-alert">
+                This will retrain your model using all previously uploaded datasets stored in the database.
+            </div>
+
+            <div class="datasets-container" id="datasets-container">
+                <div class="text-center py-4" id="datasets-loading">
+                    <div class="retrain-upload-icon">
+                        <i class="fas fa-spinner fa-spin"></i>
+                    </div>
+                    <p>Loading available datasets...</p>
+                </div>
+
+                <!-- Dataset cards will be loaded here -->
+            </div>
+
+            <div class="model-select-container">
+                <label for="existing-model-select" class="model-select-label">Base Model:</label>
+                <select id="existing-model-select" class="model-select">
+                    <option value="" selected disabled>Select a model</option>
+                    <option value="baseline_cnn">Baseline CNN</option>
+                    <option value="mobilenet_v2">MobileNet V2</option>
+                    <option value="efficientnet_b0">EfficientNet B0</option>
+                </select>
+            </div>
+
+            <div class="epochs-container">
+                <label for="training-epochs" class="epochs-label">Number of Epochs:</label>
+                <input type="number" id="training-epochs" class="epochs-input" min="1" max="20" value="5">
+            </div>
+
+            <button id="retrain-from-db-btn" class="retrain-btn">Start Retraining</button>
+        </div>
+
+        <!-- Progress Container (shared between tabs) -->
+        <div class="progress-container" id="progress-container">
+            <div class="progress-bar-container">
+                <div class="progress-bar" id="progress-bar"></div>
+            </div>
+            <div class="progress-status" id="progress-status">Initializing training...</div>
+
+            <div class="results-container" id="results-container">
+                <h3 class="results-title">Training Results</h3>
+                <table class="results-table">
+                    <tr>
+                        <th>Model Name</th>
+                        <td id="result-model-name">-</td>
+                    </tr>
+                    <tr>
+                        <th>Epochs</th>
+                        <td id="result-epochs">-</td>
+                    </tr>
+                    <tr>
+                        <th>Final Accuracy</th>
+                        <td id="result-accuracy">-</td>
+                    </tr>
+                    <tr>
+                        <th>Validation Accuracy</th>
+                        <td id="result-val-accuracy">-</td>
+                    </tr>
+                    <tr>
+                        <th>F1 Score (Macro)</th>
+                        <td id="result-f1-score">-</td>
+                    </tr>
+                </table>
+
+                <button id="reset-btn" class="btn-reset">Train Another Model</button>
+            </div>
+        </div>
     </div>
 
-<!-- footer section -->
-
-<footer>
-    <div>
-        <p>&copy; 2025 Ekonify. All rights reserved.</p>
-        <p>made with 🤍 by <a href="https://linktr.ee/climiradi">Eunice <> Climiradi</a></p>
-    </div>
-</footer>
-<script src="/front-end/script.js"></script>
+    <!-- footer section -->
+    <footer>
+        <div>
+            <p>&copy; 2025 Ekonify. All rights reserved.</p>
+            <p>made with 🤍 by <a href="https://linktr.ee/climiradi">Eunice <> Climiradi</a></p>
+        </div>
+    </footer>
+    <script src="/front-end/script.js"></script>
+    <script src="/front-end/retrain-script.js"></script>
 </body>
 
 </html>
