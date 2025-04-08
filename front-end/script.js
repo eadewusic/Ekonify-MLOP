@@ -210,6 +210,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Form submission handler
     if (form) {
+      // Remove action attribute from form to prevent double submission
+      if (isRetrainPage) {
+        form.removeAttribute("action");
+      }
+
       form.addEventListener("submit", async (e) => {
         e.preventDefault();
         const file = fileInput.files[0];
@@ -233,40 +238,52 @@ document.addEventListener("DOMContentLoaded", () => {
             formData.append("model_name", modelSelect.value);
           }
 
+          // Show progress UI with real progress indicators for Upload New Dataset tab
+          document.getElementById("new-dataset-tab").style.display = "none";
+          const progressContainer =
+            document.getElementById("progress-container");
+          progressContainer.style.display = "block";
+
+          const progressBar = document.getElementById("progress-bar");
+          const progressStatus = document.getElementById("progress-status");
+          const resultsContainer = document.getElementById("results-container");
+
+          progressBar.style.width = "20%";
+          progressStatus.textContent = "Uploading dataset to server...";
+          resultsContainer.style.display = "none";
+
+          // Disable the button while processing
           if (retrainBtn) {
-            retrainBtn.textContent = "Uploading...";
             retrainBtn.disabled = true;
           }
-        }
 
-        try {
-          const response = await fetch(endpoint, {
-            method: "POST",
-            body: formData,
-          });
+          // Update progress during processing
+          let progress = 20;
+          const progressInterval = setInterval(() => {
+            if (progress < 80) {
+              progress += 5;
+              progressBar.style.width = `${progress}%`;
+              progressStatus.textContent =
+                progress < 50 ? "Processing dataset..." : "Training model...";
+            } else {
+              clearInterval(progressInterval);
+            }
+          }, 1000);
 
-          if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.detail || "Request failed");
-          }
+          try {
+            const response = await fetch(endpoint, {
+              method: "POST",
+              body: formData,
+            });
 
-          const result = await response.json();
+            clearInterval(progressInterval);
 
-          if (isRetrainPage) {
-            // Handle retrain response
-            if (retrainBtn) {
-              retrainBtn.textContent = "Start Retraining";
-              retrainBtn.disabled = false;
+            if (!response.ok) {
+              const errorData = await response.json();
+              throw new Error(errorData.detail || "Request failed");
             }
 
-            // Show progress UI with real results
-            document.getElementById("new-dataset-tab").style.display = "none";
-            const progressContainer =
-              document.getElementById("progress-container");
-            progressContainer.style.display = "block";
-
-            const progressBar = document.getElementById("progress-bar");
-            const progressStatus = document.getElementById("progress-status");
+            const result = await response.json();
 
             // Update with real training results
             progressBar.style.width = "100%";
@@ -274,27 +291,45 @@ document.addEventListener("DOMContentLoaded", () => {
 
             // Display the real results
             displayRetrainingResults(result.results);
-          } else {
+
+            // Re-enable the button
+            if (retrainBtn) {
+              retrainBtn.disabled = false;
+            }
+          } catch (error) {
+            clearInterval(progressInterval);
+            console.error("Retraining failed:", error);
+            progressStatus.textContent = "Error: " + error.message;
+            progressBar.style.backgroundColor = "#f44336";
+
+            // Re-enable the button
+            if (retrainBtn) {
+              retrainBtn.disabled = false;
+            }
+          }
+        } else {
+          // This is the regular predict functionality
+          try {
+            const response = await fetch(endpoint, {
+              method: "POST",
+              body: formData,
+            });
+
+            if (!response.ok) {
+              const errorData = await response.json();
+              throw new Error(errorData.detail || "Request failed");
+            }
+
+            const result = await response.json();
+
             // Handle predict response
             displayPrediction({
               class: result.prediction,
               confidence: result.confidence,
             });
-          }
-        } catch (error) {
-          console.error(
-            `${isRetrainPage ? "Retraining" : "Prediction"} failed:`,
-            error
-          );
-          alert(
-            `An error occurred while ${
-              isRetrainPage ? "retraining" : "predicting"
-            }: ${error.message}`
-          );
-
-          if (isRetrainPage && retrainBtn) {
-            retrainBtn.textContent = "Start Retraining";
-            retrainBtn.disabled = false;
+          } catch (error) {
+            console.error("Prediction failed:", error);
+            alert("An error occurred while predicting: " + error.message);
           }
         }
       });
@@ -360,9 +395,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Set up the progress and results functionality
     setupProgressAndResults();
-
-    // Handle the original upload form submission
-    setupOriginalUploadForm();
   }
 
   // Counter animation function for homepage
@@ -440,12 +472,14 @@ document.addEventListener("DOMContentLoaded", () => {
     const API_BASE_URL = "http://localhost:8000";
 
     try {
+      console.log("Fetching models list from API...");
       const response = await fetch(`${API_BASE_URL}/models`);
       if (!response.ok) {
-        throw new Error("Failed to fetch models");
+        throw new Error(`Failed to fetch models: ${response.statusText}`);
       }
 
       const models = await response.json();
+      console.log("Models received:", models);
 
       // Populate all model select dropdowns
       const modelSelects = [
@@ -471,6 +505,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
             baseModels.forEach((model) => {
               const option = document.createElement("option");
+              // Store the full path in a data attribute if needed
+              option.setAttribute("data-path", model.path || "");
               option.value = model.name;
               option.textContent = model.name;
               baseOptgroup.appendChild(option);
@@ -490,7 +526,9 @@ document.addEventListener("DOMContentLoaded", () => {
             retrainedModels.forEach((model) => {
               const option = document.createElement("option");
               option.value = model.name;
-              option.textContent = `${model.name} (${model.created_at})`;
+              option.textContent = `${model.name} (${
+                model.created_at || "Unknown"
+              })`;
               retrainedOptgroup.appendChild(option);
             });
 
@@ -538,15 +576,35 @@ function setupContinueTrainingTab() {
     modelInfoPlaceholder.textContent = "Loading model information...";
 
     try {
+      console.log(`Fetching model info for: ${modelName}`);
       // Call API to get model info
       const response = await fetch(
         `${API_BASE_URL}/models/${modelName}/latest`
       );
+
       if (!response.ok) {
+        // For .pkl files in the models directory that aren't in the database yet
+        const selectedOption =
+          continueModelSelect.options[continueModelSelect.selectedIndex];
+        if (selectedOption && selectedOption.getAttribute("data-path")) {
+          // Just show basic info for files that exist but aren't in the database
+          document.getElementById("last-model-name").textContent = modelName;
+          document.getElementById("last-model-date").textContent =
+            "Unknown (not in database)";
+          document.getElementById("last-model-epochs").textContent = "Unknown";
+          document.getElementById("last-model-accuracy").textContent =
+            "Unknown";
+
+          modelInfoPlaceholder.style.display = "none";
+          modelInfoDetails.style.display = "block";
+          return;
+        }
+
         throw new Error(`Failed to fetch model info: ${response.statusText}`);
       }
 
       const modelData = await response.json();
+      console.log("Model info received:", modelData);
 
       // Update UI with model info
       document.getElementById("last-model-name").textContent =
@@ -619,6 +677,7 @@ function setupContinueTrainingTab() {
       }, 1000);
 
       if (!response.ok) {
+        clearInterval(progressInterval);
         const errorData = await response.json();
         throw new Error(errorData.detail || "Training failed");
       }
@@ -658,7 +717,7 @@ function setupExistingDatasetsTab() {
   loadDatasets();
 
   async function loadDatasets() {
-    // Add a loading indicator if it doesn't exist
+    // Create a loading indicator if it doesn't exist
     if (!datasetsLoading) {
       const loadingDiv = document.createElement("div");
       loadingDiv.id = "datasets-loading";
@@ -670,18 +729,23 @@ function setupExistingDatasetsTab() {
     }
 
     try {
+      console.log("Fetching datasets from API");
       const response = await fetch(`${API_BASE_URL}/datasets`);
       if (!response.ok) {
         throw new Error(`Failed to fetch datasets: ${response.statusText}`);
       }
 
       const datasets = await response.json();
+      console.log(`Received ${datasets.length} datasets`);
 
       // Hide loading indicator
       const loadingElement = document.getElementById("datasets-loading");
       if (loadingElement) {
         loadingElement.style.display = "none";
       }
+
+      // Clear previous content - we need to completely clear old sample data
+      datasetsContainer.innerHTML = "";
 
       if (datasets.length === 0) {
         datasetsContainer.innerHTML = `
@@ -691,11 +755,6 @@ function setupExistingDatasetsTab() {
         `;
         return;
       }
-
-      // Clear previous content except loading indicator
-      const currentContent = datasetsContainer.innerHTML;
-      const loadingHTML = loadingElement ? loadingElement.outerHTML : "";
-      datasetsContainer.innerHTML = loadingHTML;
 
       // Add dataset cards
       datasets.forEach((dataset) => {
@@ -725,20 +784,10 @@ function setupExistingDatasetsTab() {
 
         datasetsContainer.appendChild(datasetCard);
       });
-
-      // Hide loading element if it exists
-      if (loadingElement) {
-        loadingElement.style.display = "none";
-      }
     } catch (error) {
       console.error("Error fetching datasets:", error);
 
-      // Hide loading indicator
-      const loadingElement = document.getElementById("datasets-loading");
-      if (loadingElement) {
-        loadingElement.style.display = "none";
-      }
-
+      // Clear any sample data and show error message
       datasetsContainer.innerHTML = `
         <div class="info-alert" style="background-color: #ffebee; border-left-color: #f44336; color: #b71c1c;">
           Error loading datasets: ${error.message}
@@ -773,6 +822,7 @@ function setupExistingDatasetsTab() {
       // Create form data for the API call
       const formData = new FormData();
       formData.append("model_name", modelName);
+      formData.append("epochs", epochs); // Add epochs parameter
 
       // Update progress
       progressBar.style.width = "10%";
@@ -853,109 +903,20 @@ function setupProgressAndResults() {
 
     const trainingEpochs = document.getElementById("training-epochs");
     if (trainingEpochs) {
-      trainingEpochs.value = 5;
-    }
-  });
-}
-
-/**
- * Sets up the original upload form to work with the tabbed interface
- */
-function setupOriginalUploadForm() {
-  const API_BASE_URL = "http://localhost:8000"; // Match the URL from top of file
-
-  const uploadForm = document.getElementById("upload-form");
-  const uploadBtn = document.querySelector('.retrain-btn[form="upload-form"]');
-  const fileInput = document.getElementById("file-upload");
-
-  if (!uploadForm || !uploadBtn) return;
-
-  // Update the form submission
-  uploadForm.addEventListener("submit", async function (e) {
-    e.preventDefault();
-
-    const file = fileInput?.files[0];
-
-    if (!file) {
-      alert("Please select a ZIP file first");
-      return;
-    }
-
-    const modelName =
-      document.getElementById("model-select")?.value || "baseline_cnn";
-
-    // Create FormData for the API call
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("model_name", modelName);
-
-    // Show progress UI
-    document.getElementById("new-dataset-tab").style.display = "none";
-    const progressContainer = document.getElementById("progress-container");
-    progressContainer.style.display = "block";
-
-    const progressBar = document.getElementById("progress-bar");
-    const progressStatus = document.getElementById("progress-status");
-    const resultsContainer = document.getElementById("results-container");
-
-    progressBar.style.width = "0%";
-    progressStatus.textContent = "Uploading dataset...";
-    resultsContainer.style.display = "none";
-
-    try {
-      // Update progress to show upload started
-      progressBar.style.width = "20%";
-      progressStatus.textContent = "Uploading dataset to server...";
-
-      // Make the API call
-      const response = await fetch(`${API_BASE_URL}/upload`, {
-        method: "POST",
-        body: formData,
-      });
-
-      // Update progress while processing
-      let progress = 20;
-      const progressInterval = setInterval(() => {
-        if (progress < 80) {
-          progress += 5;
-          progressBar.style.width = `${progress}%`;
-          progressStatus.textContent =
-            progress < 50 ? "Processing dataset..." : "Training model...";
-        } else {
-          clearInterval(progressInterval);
-        }
-      }, 1000);
-
-      // Check if response is successful
-      if (!response.ok) {
-        clearInterval(progressInterval);
-        const errorData = await response.json();
-        throw new Error(errorData.detail || "Upload failed");
-      }
-
-      const data = await response.json();
-      clearInterval(progressInterval);
-
-      // Update to complete
-      progressBar.style.width = "100%";
-      progressStatus.textContent = "Upload and training complete!";
-
-      // Display results
-      displayRetrainingResults(data.results);
-    } catch (error) {
-      console.error("Error during upload/training:", error);
-      progressStatus.textContent = "Error: " + error.message;
-      progressBar.style.backgroundColor = "#f44336";
+      trainingEpochs.value = 1; // Set default to 1
     }
   });
 }
 
 /**
  * Displays training results in the results container
+ * Updated to show all metrics
  */
 function displayRetrainingResults(results) {
   const resultsContainer = document.getElementById("results-container");
   if (!resultsContainer) return;
+
+  console.log("Displaying training results:", results);
 
   // Set result values
   document.getElementById("result-model-name").textContent =
@@ -965,18 +926,95 @@ function displayRetrainingResults(results) {
 
   // Format metrics with percentages if they exist
   const metrics = results.model_performance_metrics || {};
+
+  // Update all available metrics
   document.getElementById("result-accuracy").textContent =
     metrics.final_accuracy !== undefined
-      ? (metrics.final_accuracy * 100).toFixed(2) + "%"
+      ? `${(metrics.final_accuracy * 100).toFixed(2)}%`
       : "-";
+
   document.getElementById("result-val-accuracy").textContent =
     metrics.final_val_accuracy !== undefined
-      ? (metrics.final_val_accuracy * 100).toFixed(2) + "%"
+      ? `${(metrics.final_val_accuracy * 100).toFixed(2)}%`
       : "-";
+
   document.getElementById("result-f1-score").textContent =
     metrics.f1_score_macro !== undefined
-      ? (metrics.f1_score_macro * 100).toFixed(2) + "%"
+      ? `${(metrics.f1_score_macro * 100).toFixed(2)}%`
       : "-";
+
+  // Add table rows for additional metrics if they don't exist
+  const resultsTable = document.querySelector(".results-table");
+
+  // Check if we need to add more metrics rows
+  if (
+    metrics.final_loss !== undefined ||
+    metrics.final_val_loss !== undefined ||
+    metrics.precision_macro !== undefined ||
+    metrics.recall_macro !== undefined
+  ) {
+    // Check if these rows already exist
+    if (!document.getElementById("result-loss")) {
+      // Add final loss row
+      const lossRow = document.createElement("tr");
+      lossRow.innerHTML = `
+        <th>Final Loss</th>
+        <td id="result-loss">-</td>
+      `;
+      resultsTable.appendChild(lossRow);
+
+      // Add validation loss row
+      const valLossRow = document.createElement("tr");
+      valLossRow.innerHTML = `
+        <th>Validation Loss</th>
+        <td id="result-val-loss">-</td>
+      `;
+      resultsTable.appendChild(valLossRow);
+
+      // Add precision row
+      const precisionRow = document.createElement("tr");
+      precisionRow.innerHTML = `
+        <th>Precision (Macro)</th>
+        <td id="result-precision">-</td>
+      `;
+      resultsTable.appendChild(precisionRow);
+
+      // Add recall row
+      const recallRow = document.createElement("tr");
+      recallRow.innerHTML = `
+        <th>Recall (Macro)</th>
+        <td id="result-recall">-</td>
+      `;
+      resultsTable.appendChild(recallRow);
+    }
+
+    // Update the additional metrics
+    if (document.getElementById("result-loss")) {
+      document.getElementById("result-loss").textContent =
+        metrics.final_loss !== undefined ? metrics.final_loss.toFixed(4) : "-";
+    }
+
+    if (document.getElementById("result-val-loss")) {
+      document.getElementById("result-val-loss").textContent =
+        metrics.final_val_loss !== undefined
+          ? metrics.final_val_loss.toFixed(4)
+          : "-";
+    }
+
+    if (document.getElementById("result-precision")) {
+      document.getElementById("result-precision").textContent =
+        metrics.precision_macro !== undefined
+          ? `${(metrics.precision_macro * 100).toFixed(2)}%`
+          : "-";
+    }
+
+    if (document.getElementById("result-recall")) {
+      document.getElementById("result-recall").textContent =
+        metrics.recall_macro !== undefined
+          ? `${(metrics.recall_macro * 100).toFixed(2)}%`
+          : "-";
+    }
+  }
 
   // Show results container
   resultsContainer.style.display = "block";
