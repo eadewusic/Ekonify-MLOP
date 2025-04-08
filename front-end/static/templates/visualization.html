@@ -58,6 +58,30 @@
                     </ul>
                 </div>
             </div>
+
+            <div class="visualization-card">
+                <img src="/front-end/images/pixel-intensity.png" alt="Distribution" class="visualization-image" />
+                <div class="visualization-content">
+                    <h3 class="visualization-title"><strong>Pixel Intensity Distribution</strong></h3>
+                    <p class="visualization-description">The pixel intensity distribution graph provides a detailed visualization of
+                        the frequency of pixel values across the
+                        dataset images, which is essential for understanding image characteristics and informing preprocessing
+                        decisions.</p>
+                    <ul class="key-points">
+                        <li><strong>Balanced Mid-Range Distribution:</strong> The distribution shows a concentration of pixel values
+                            in the mid-range (100-150), with prominent peaks around 110-120, indicating good contrast in the
+                            majority of the images.</li>
+                        <li><strong>Multi-Modal Pattern:</strong> The presence of distinct peaks (around 110-120 and 180-190)
+                            suggests different brightness regions within the images,
+                            which is typical in images with well-defined features or structures.</li>
+                        <li><strong>Good Dynamic Range:</strong> The distribution spans across most of the 0-255 range with minimal
+                            values at the extremes, indicating images with good
+                            dynamic range that aren't dominated by very dark or very bright pixels.</li>
+                        <li><strong>Solution - Preprocessing:</strong> While this distribution is already well-balanced, further enhancements could include subtle histogram equalization or
+                        normalization to 0-1 range to optimize neural network performance.</li>
+                    </ul>
+                </div>
+            </div>
     
             <div class="visualization-card">
                 <img src="/front-end/images/retrained-graph.png" alt="Training & Validation Performance"
@@ -75,28 +99,20 @@
             </div>
     
             <div class="visualization-card">
-                <img src="/front-end/images/" alt="Distribution"
-                    class="visualization-image" />
+                <img src="/front-end/images/image-dimension.png" alt="Distribution" class="visualization-image" />
                 <div class="visualization-content">
-                    <h3 class="visualization-title"><strong>Aspect Ratio Distribution</strong></h3>
-                    <p class="visualization-description">The aspect ratio distribution shows that most images</p>
+                    <h3 class="visualization-title"><strong>Image Dimension Analysis</strong></h3>
+                    <p class="visualization-description">The image dimension visualizations provide critical information about the dataset's structural uniformity, which is
+                    essential for model architecture design and preprocessing decisions.</p>
                     <ul class="key-points">
-                        <li><strong>Most re:</strong> The majority of.</li>
-                        <li><strong>Low Ditios:</strong> ed.</li>
-                        <li><strong>Imbalanodel:</strong> The is applied.</li>
-                    </ul>
-                </div>
-            </div>
-    
-            <div class="visualization-card">
-                <img src="/front-end/images/" alt="Distribution" class="visualization-image" />
-                <div class="visualization-content">
-                    <h3 class="visualization-title"><strong> Distribution</strong></h3>
-                    <p class="visualization-description"> brightness levels.</p>
-                    <ul class="key-points">
-                        <li><strong>Balaness:</strong> of the dataset.</li>
-                        <li><strong>Limiteemes:</strong>sed or underexposed images.</li>
-                        <li><strong>Unifoity:</strong>The preprocessing.</li>
+                        <li><strong>Consistent Image Dimensions:</strong> All images in the dataset have identical dimensions of 512 × 384 pixels, as demonstrated by the single-value spikes in
+                        both the width and height histograms and the solitary point in the scatter plot.</li>
+                        <li><strong>Standardized Aspect Ratio:</strong> The uniform dimensions indicate a consistent aspect ratio of 4:3 (or 1.33:1), which eliminates the need for aspect ratio
+                        adjustments during preprocessing.</li>
+                        <li><strong>Preprocessing Advantage:</strong> This dimensional consistency eliminates the need for resizing operations in the preprocessing pipeline, preventing
+                        potential distortions or information loss typically associated with variable-sized inputs.</li>
+                        <li><strong>Model Optimization Opportunity:</strong> The fixed input size allows for precise model architecture design, enabling optimization of filter sizes and network
+                        structure specifically for this 512 × 384 pixel format.</li>
                     </ul>
                 </div>
             </div>
