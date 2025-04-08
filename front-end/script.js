@@ -114,7 +114,8 @@ document.addEventListener("DOMContentLoaded", () => {
         fileInput.files = files;
 
         if (isRetrainPage) {
-          handleRetrainFile(files[0]);
+          // Use the new animated checkmark function
+          showFileSelectedAnimatedCheckmark(files[0]);
         } else if (imagePreview) {
           previewImage(); // Show the preview when dropped
         }
@@ -126,13 +127,54 @@ document.addEventListener("DOMContentLoaded", () => {
       const file = this.files[0];
 
       if (isRetrainPage) {
-        handleRetrainFile(file);
+        // Use the new animated checkmark function
+        showFileSelectedAnimatedCheckmark(file);
       } else if (imagePreview) {
         previewImage();
       }
     });
 
-    // Handle retrain file selection
+    // New function: Show file selected with animated checkmark
+    function showFileSelectedAnimatedCheckmark(file) {
+      if (!file) return;
+
+      // Check if it's a ZIP file
+      if (
+        file.type === "application/zip" ||
+        file.name.toLowerCase().endsWith(".zip")
+      ) {
+        // Create container for the success animation
+        dropZone.innerHTML = `
+          <div class="file-success-container">
+            <div class="checkmark-circle">
+              <div class="checkmark-check"></div>
+            </div>
+            <p class="file-selected-text">
+              Selected file: <strong>${file.name}</strong>
+            </p>
+          </div>
+        `;
+
+        // Add the success class to trigger animation
+        setTimeout(() => {
+          const checkmarkCircle = document.querySelector(".checkmark-circle");
+          if (checkmarkCircle) {
+            checkmarkCircle.classList.add("animate");
+          }
+        }, 100);
+
+        // Update button styling if it exists
+        if (retrainBtn) {
+          retrainBtn.style.backgroundColor = "#2e7d32";
+          retrainBtn.style.opacity = "1";
+        }
+      } else {
+        alert("Please select a ZIP file");
+        resetFileInput();
+      }
+    }
+
+    // Locate the handleRetrainFile function and replace it with this implementation:
     function handleRetrainFile(file) {
       if (!file) return;
 
@@ -141,11 +183,34 @@ document.addEventListener("DOMContentLoaded", () => {
         file.type === "application/zip" ||
         file.name.toLowerCase().endsWith(".zip")
       ) {
-        // Update the drop zone text
-        const uploadText = dropZone.querySelector(".retrain-upload-text");
-        if (uploadText) {
-          uploadText.innerHTML = `Selected file: <strong>${file.name}</strong><br>Click "Start Retraining" to begin`;
-        }
+        // Replace upload icon with animated checkmark
+        dropZone.innerHTML = `
+      <div style="text-align: center;">
+        <svg class="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52" style="width: 60px; height: 60px;">
+          <circle class="checkmark-circle" cx="26" cy="26" r="25" fill="none" style="stroke: #2e7d32; stroke-width: 2; opacity: 0; animation: circle-fill 0.5s ease-in-out forwards;"/>
+          <path class="checkmark-check" d="M14.1 27.2l7.1 7.2 16.7-16.8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" style="stroke-dasharray: 48; stroke-dashoffset: 48; animation: stroke-fill 0.5s ease-in-out 0.5s forwards;"/>
+        </svg>
+        <p style="margin-top: 15px; color: #2e7d32; font-weight: bold;">
+          Selected file: ${file.name}
+        </p>
+        <p style="margin-top: 5px; color: #555;">
+          Click "Start Retraining" to begin
+        </p>
+      </div>
+    `;
+
+        // Add styles for the animation
+        const style = document.createElement("style");
+        style.textContent = `
+      @keyframes circle-fill {
+        0% { opacity: 0; }
+        100% { opacity: 1; }
+      }
+      @keyframes stroke-fill {
+        100% { stroke-dashoffset: 0; }
+      }
+    `;
+        document.head.appendChild(style);
 
         // Update button styling if it exists
         if (retrainBtn) {

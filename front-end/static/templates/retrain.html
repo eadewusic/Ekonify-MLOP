@@ -58,7 +58,7 @@
             </div>
 
             <form class="retrain-upload-container" id="upload-form" enctype="multipart/form-data" method="POST"
-                action="http://localhost:8000/upload">
+                action="/api/upload">
                 <input type="file" id="file-upload" name="file" accept=".zip" style="display: none;" />
 
                 <label for="file-upload" id="drop-zone">
@@ -122,14 +122,24 @@
             </div>
 
             <div class="datasets-container" id="datasets-container">
-                <div class="text-center py-4" id="datasets-loading">
-                    <div class="retrain-upload-icon">
-                        <i class="fas fa-spinner fa-spin"></i>
-                    </div>
-                    <p>Loading available datasets...</p>
+                <!-- Remove loading indicator and replace with error message if needed -->
+                <div id="datasets-error" class="error-message" style="display: none;">
+                    <p><i class="fas fa-exclamation-circle"></i> Error: Could not load datasets.</p>
+                    <p>Please try again later or contact support.</p>
                 </div>
 
                 <!-- Dataset cards will be loaded here -->
+                <div class="dataset-card">
+                    <div class="dataset-header">
+                        <div class="dataset-name">Sample Dataset</div>
+                        <div class="dataset-size">25MB</div>
+                    </div>
+                    <div class="dataset-info">
+                        <div><strong>Categories:</strong> Plastic, Glass, Paper, Metal</div>
+                        <div><strong>Images:</strong> 1,200</div>
+                        <div><strong>Uploaded:</strong> April 5, 2025</div>
+                    </div>
+                </div>
             </div>
 
             <div class="model-select-container">
@@ -194,8 +204,8 @@
             <p>made with 🤍 by <a href="https://linktr.ee/climiradi">Eunice <> Climiradi</a></p>
         </div>
     </footer>
+
     <script src="/front-end/script.js"></script>
-    <script src="/front-end/retrain-script.js"></script>
 </body>
 
 </html>
