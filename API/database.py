@@ -365,6 +365,31 @@ class Database:
         except Exception as e:
             logger.error(f"Error closing connection: {e}")
 
+    def get_datasets_metadata(self):
+        """Get metadata list of all datasets in the database without the actual zip data"""
+        try:
+            # Check if datasets collection exists
+            if "datasets" not in self.db.list_collection_names():
+                logger.warning("Datasets collection does not exist in database")
+                return []
+                
+            # Get the most recent datasets
+            datasets = list(self.db.datasets.find().sort("timestamp", -1))
+            
+            # Convert ObjectId to string and remove binary data
+            for dataset in datasets:
+                dataset["_id"] = str(dataset["_id"])
+                dataset["dataset_file_id"] = str(dataset["dataset_file_id"])
+                # Add filename if not present
+                if "filename" not in dataset:
+                    dataset["filename"] = f"Dataset_{dataset['_id'][-6:]}"
+            
+            logger.info(f"Retrieved metadata for {len(datasets)} datasets")
+            return datasets
+        except PyMongoError as e:
+            logger.error(f"Error retrieving datasets metadata: {e}")
+            return []
+
 if __name__ == "__main__":
     # Test connection
     db = Database()

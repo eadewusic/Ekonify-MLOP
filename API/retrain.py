@@ -56,8 +56,17 @@ class ModelManager:
             directory.mkdir(parents=True, exist_ok=True)
     
     def get_model_path(self, model_name: str) -> Path:
-        """Get the path for a model file."""
-        return self.models_base_path / f"{model_name}.pkl"  # Using .pkl extension
+        """
+        Get the path for a model file.
+        Checks both the main directory and user_retrained_models.
+        """
+        # First check if the model exists in the user_retrained_models subdirectory
+        retrained_path = self.models_base_path / "user_retrained_models" / f"{model_name}.pkl"
+        if retrained_path.exists():
+            return retrained_path
+        
+        # If not found there, return the path in the main directory
+        return self.models_base_path / f"{model_name}.pkl"
     
     def validate_model_exists(self, model_name: str) -> bool:
         """Check if a model exists and list available models for debugging."""
@@ -71,16 +80,46 @@ class ModelManager:
         
         # List available models for debugging
         try:
-            available_models = [f.name for f in self.models_base_path.iterdir() if f.is_file()]
+            available_models = []
+            # Check main directory for .pkl files
+            for file_path in self.models_base_path.glob("*.pkl"):
+                if file_path.is_file():
+                    available_models.append(file_path.name)
+            
+            # Check user_retrained_models subdirectory if it exists
+            retrained_dir = self.models_base_path / "user_retrained_models"
+            if retrained_dir.exists():
+                for file_path in retrained_dir.glob("*.pkl"):
+                    if file_path.is_file():
+                        available_models.append(f"user_retrained_models/{file_path.name}")
+            
             logger.info(f"Available models: {available_models}")
         except Exception as e:
             logger.error(f"Error listing models directory: {e}")
             available_models = []
         
-        # Check if model exists
-        exists = model_path.exists()
-        logger.info(f"Model exists: {exists}")
-        return exists
+        # First check if the model exists in the main directory
+        if model_path.exists():
+            logger.info(f"Model found in main directory: {model_path}")
+            return True
+        
+        # If not found in main directory, check in user_retrained_models subdirectory
+        retrained_path = self.models_base_path / "user_retrained_models" / f"{model_name}.pkl"
+        if retrained_path.exists():
+            logger.info(f"Model found in user_retrained_models directory: {retrained_path}")
+            return True
+        
+        # Also check for retrained model in database
+        try:
+            db_model = self.db.get_latest_retrained_model(model_name)
+            if db_model:
+                logger.info(f"Model found in database: {model_name}")
+                return True
+        except Exception as e:
+            logger.error(f"Error checking database for model: {e}")
+        
+        logger.warning(f"Model not found: {model_name}")
+        return False
     
     def get_latest_retrained_model(self, base_model_name: str):
         """Get the latest retrained model from database."""
@@ -615,10 +654,13 @@ async def continue_training(
 @router.post("/retrain-from-db")
 async def retrain_from_database(
     model_name: str = "baseline_cnn",
+    epochs: int = 1,  # Changed default to 1
     background_tasks: BackgroundTasks = None
 ):
     """Retrain model using all images previously stored in database datasets"""
     try:
+        logger.info(f"Starting retraining with model: {model_name}, epochs: {epochs}")
+        
         # Prepare dataset from DB using previously collected data
         dataset_path, used_dataset_ids = data_processor.prepare_dataset_from_db()
         
@@ -627,7 +669,8 @@ async def retrain_from_database(
             raise HTTPException(status_code=404, detail=f"Model '{model_name}' not found.")
         
         # Train model from scratch using all stored datasets
-        results = model_trainer.train_model(model_name, dataset_path)
+        # Pass the epochs parameter to train_model
+        results = model_trainer.train_model(model_name, dataset_path, epochs=epochs)
         
         # Record training session
         training_id = data_processor.db.record_training_session(
@@ -648,7 +691,7 @@ async def retrain_from_database(
             "training_session_id": training_id,
             "datasets_used": len(used_dataset_ids)
         }
-    except HTTPException as e:
+    except HTTPException:
         raise
     except Exception as e:
         logger.error(f"Retraining error: {str(e)}")
