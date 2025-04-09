@@ -54,6 +54,10 @@ This project is an AI-powered platform designed for image classification with a 
 2. The model is retrained with the new dataset and updated accordingly.
 3. The updated model is saved for future use.
 
+## Deployment
+- Ekonify Front-End: See it on [Render](https://ekonify-frontend.onrender.com)
+- Ekonify API: See it on [Railway](https://railway.com/)
+
 ## Video Presentation
 Watch my demo video [here](https://www.youtube.com/@climiradiroberts) 
 
