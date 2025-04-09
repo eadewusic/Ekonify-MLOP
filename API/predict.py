@@ -27,7 +27,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Load trained model
-MODEL_PATH = "../models/baseline_cnn.pkl"
+MODEL_PATH = "./models/baseline_cnn.pkl"
 try:
     with open(MODEL_PATH, 'rb') as file:
         model = pickle.load(file)
