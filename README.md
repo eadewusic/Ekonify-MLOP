@@ -3,7 +3,7 @@ here, I'll be creating an ML Pipeline, scaling and monitoring it on a cloud plat
 
 This project is an AI-powered platform designed for image classification with a built-in functionality to retrain the model based on new data stored in a MongoDB database.
 
-![image](./front-end/images/Ekonify-H.S..png)
+![image](./front-end/static/images/Ekonify-H.S..png)
 
 ## Features
 - Upload images and store metadata in MongoDB
