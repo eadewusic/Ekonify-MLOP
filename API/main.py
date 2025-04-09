@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+import os
 
 # Import your API routers
 from predict import app as predict_app
@@ -11,10 +12,13 @@ app = FastAPI(
     version="2.0"
 )
 
+# Get allowed origins from environment variable or use default for development
+ALLOWED_ORIGINS = os.getenv("ALLOWED_ORIGINS", "*").split(",")
+
 # Configure CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # For development - restrict this in production
+    allow_origins=ALLOWED_ORIGINS,  # Use environment variable in production
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -40,6 +44,12 @@ for route in retrain_app.routes:
 app.include_router(predict_router)
 app.include_router(retrain_router)
 
+@app.get("/")
+async def root():
+    return {"message": "Ekonify API v2.0 is running!"}
+
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)
+    # Use PORT environment variable for production (Render sets this)
+    port = int(os.getenv("PORT", 8000))
+    uvicorn.run("main:app", host="0.0.0.0", port=port)

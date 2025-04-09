@@ -5,12 +5,20 @@ from datetime import datetime
 from pymongo.errors import ConnectionFailure, PyMongoError
 import logging
 import pickle
+import os
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+# Get MongoDB URI from environment variable or use default
+MONGODB_URI = os.getenv("MONGODB_URI", "mongodb://adminUser:Climiradi_01@127.0.0.1:27017/?authSource=admin")
+
 class Database:
-    def __init__(self, db_name="Ekonify", uri="mongodb://adminUser:Climiradi_01@127.0.0.1:27017/?authSource=admin"):
+    def __init__(self, db_name="Ekonify", uri=MONGODB_URI):
         try:
             self.client = MongoClient(uri, serverSelectionTimeoutMS=5000)
             self.client.admin.command('ping')  # Test connection

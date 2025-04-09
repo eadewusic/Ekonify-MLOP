@@ -1,6 +1,8 @@
 document.addEventListener("DOMContentLoaded", () => {
-  // API base URL - change this for production deployment
-  const API_BASE_URL = "http://localhost:8000"; // Your API server URL
+  // Use the API base URL from config.js instead of hardcoding
+  const API_BASE_URL = config.apiBaseUrl;
+  
+  console.log("Using API URL:", API_BASE_URL);
 
   // Check if we're on the home page with counters
   const homeItemsCounter = document.getElementById("items-counter");
@@ -469,7 +471,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Initialize model lists for all selects
   async function initializeModelLists() {
-    const API_BASE_URL = "http://localhost:8000";
+    const API_BASE_URL = "API_BASE_URL";
 
     try {
       console.log("Fetching models list from API...");
@@ -550,7 +552,7 @@ document.addEventListener("DOMContentLoaded", () => {
  * Sets up the Continue Training tab functionality
  */
 function setupContinueTrainingTab() {
-  const API_BASE_URL = "http://localhost:8000"; // Match the URL from top of file
+  const API_BASE_URL = "API_BASE_URL"; // Match the URL from top of file
 
   const continueModelSelect = document.getElementById("continue-model-select");
   const modelInfoPlaceholder = document.getElementById(
@@ -705,7 +707,7 @@ function setupContinueTrainingTab() {
  * Sets up the Use Existing Datasets tab functionality
  */
 function setupExistingDatasetsTab() {
-  const API_BASE_URL = "http://localhost:8000"; // Match the URL from top of file
+  const API_BASE_URL = "API_BASE_URL"; // Match the URL from top of file
 
   const datasetsContainer = document.getElementById("datasets-container");
   const datasetsLoading = document.getElementById("datasets-loading");
