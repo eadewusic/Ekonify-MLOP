@@ -19,9 +19,9 @@
         </div>
         <nav>
             <ul>
-                <li><a href="./predict.html">Predict</a></li>
-                <li><a href="./retrain.html">Retrain</a></li>
-                <li><a href="./visualization.html">Visualization</a></li>
+                <li><a href="predict.html">Predict</a></li>
+                <li><a href="retrain.html">Retrain</a></li>
+                <li><a href="visualization.html">Visualization</a></li>
             </ul>
         </nav>
     </header>
@@ -30,7 +30,7 @@
         <h1 class="predict-title">Waste Classification</h1>
     
         <form class="upload-container" id="upload-form" enctype="multipart/form-data" method="POST"
-            action="http://localhost:8000/predict/">
+            action="/api/predict/">
             <input type="file" id="file-upload" name="file" accept="image/jpeg,image/png,image/webp"
                 style="display: none;" />
     
