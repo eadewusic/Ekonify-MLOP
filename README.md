@@ -59,7 +59,7 @@ This project is an AI-powered platform designed for image classification with a 
 - Ekonify API: See it on [Railway](https://railway.com/)
 
 ## Video Presentation
-Watch my demo video [here](https://drive.google.com/file/d/1jNZpiuVs6r-j1mQWYz_Q86DUggM1T6sC/view?usp=drive_link) 
+Watch my demo video [here](https://drive.google.com/file/d/1OzsWdZ60iQo4WA-le_D9295rnVbKTey0/view?usp=drive_link) 
 
 ## Initial Repo for Model Training
 See it here - https://github.com/eadewusic/Ekonify.git
