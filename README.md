@@ -79,7 +79,6 @@ Ekonify is an AI-powered waste classification and recycling optimization platfor
 ### Prerequisites
 - Python 3.8+
 - MongoDB 4.4+
-- Node.js 14+ (for frontend development)
 
 ### Backend Setup
 1. Clone the repository:
@@ -128,7 +127,7 @@ Ekonify is an AI-powered waste classification and recycling optimization platfor
 
 3. Serve the frontend using your preferred method:
    ```bash
-   python -m http.server 3000
+   python -m http.server 8080
    ```
 
 ## API Documentation
